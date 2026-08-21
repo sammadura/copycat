@@ -12,6 +12,7 @@
     drawRipples();
     drawShore();
     drawChargeLine();
+    drawAimLine();
     drawRidge(ridges.near, H * 0.92, H * 0.1, "#08070c", 0.55);
     drawStone();
     drawVignette();
@@ -35,6 +36,7 @@
     if (isUi(e.target) || shopOpen) return;
     if (e.cancelable) e.preventDefault();
     holdPointer = true;
+    beginAim(e.clientY);
     beginCharge();
   }
   function up(e) {
@@ -47,13 +49,29 @@
 
   window.addEventListener("resize", resize);
   window.addEventListener("pointerdown", down, { passive: false });
+  window.addEventListener("pointermove", function (e) {
+    if (shopOpen || isUi(e.target)) return;
+    if (state !== "charging" && !holdPointer) return;
+    if (e.cancelable) e.preventDefault();
+    setAimFromPointer(e.clientY);
+  }, { passive: false });
   window.addEventListener("pointerup", up, { passive: false });
   window.addEventListener("pointercancel", up, { passive: false });
   window.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
   window.addEventListener("keydown", function (e) {
-    if (e.code !== "Space" && e.key !== " ") return;
     if (shopOpen) return;
+    if (e.code === "ArrowUp" || e.code === "KeyW") {
+      e.preventDefault();
+      nudgeAim(1);
+      return;
+    }
+    if (e.code === "ArrowDown" || e.code === "KeyS") {
+      e.preventDefault();
+      nudgeAim(-1);
+      return;
+    }
+    if (e.code !== "Space" && e.key !== " ") return;
     e.preventDefault();
     if (e.repeat) return;
     holdSpace = true;
