@@ -56,8 +56,6 @@
   const AIM_HI = 0.48;
   const AIM_DEFAULT = 0.22;
   let aimAngle = AIM_DEFAULT;
-  let aimStartY = 0;
-  let aimStartA = AIM_DEFAULT;
   let wind = 0;
   let skips = 0;
   let maxX = 0;
@@ -306,8 +304,8 @@
     wind = (Math.random() * 2 - 1) * 22;
     if (Math.abs(wind) < 4) wind = 0;
     if (!wind) elWind.textContent = "still air";
-    else if (wind > 0) elWind.textContent = "tailwind  ››";
-    else elWind.textContent = "‹‹  headwind";
+    else if (wind > 0) elWind.textContent = "tailwind  \u203a\u203a";
+    else elWind.textContent = "\u2039\u2039  headwind";
   }
 
   const Sfx = {
@@ -484,16 +482,17 @@
   function clampAim(a) {
     return Math.max(AIM_LO, Math.min(AIM_HI, a));
   }
-  function beginAim(clientY) {
-    aimStartY = clientY;
-    aimStartA = aimAngle;
-  }
-  function setAimFromPointer(clientY) {
-    const h = 0.42 * window.innerHeight;
-    aimAngle = clampAim(aimStartA + (aimStartY - clientY) / h * (AIM_HI - AIM_LO));
+  function setAimFromPointer(clientX, clientY) {
+    if (state !== "ready" && state !== "charging") return;
+    const off = chargeDrawOffset();
+    const x0 = wx(stone.x + off.x);
+    const y0 = wy(stone.y + off.y);
+    const dx = clientX - x0;
+    const dy = y0 - clientY;
+    aimAngle = clampAim(Math.atan2(dy, Math.max(12, dx)));
   }
   function nudgeAim(dir) {
-    aimAngle = clampAim(aimAngle + dir * 0.012);
+    aimAngle = clampAim(aimAngle + dir * 0.05);
   }
 
   function releaseThrow() {
@@ -641,10 +640,10 @@
     if (justCleared) {
       elResult.classList.add("far-shore");
       elResult.innerHTML = "Far shore<span class=\"sub\">Level complete</span>";
-      } else {
+    } else {
       elResult.classList.remove("far-shore");
       const label = skips === 1 ? "1 skip" : skips + " skips";
-      elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
+      elResult.textContent = label + (isNewBest ? " \u00b7 new best" : "") + " \u00b7 +" + gained + " pebbles";
     }
     requestAnimationFrame(function () { elResult.classList.add("show"); });
   }
@@ -792,3 +791,4 @@
       y: waterScreen - H * lifts[Math.max(0, Math.min(5, eye | 0))]
     };
   }
+
