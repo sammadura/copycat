@@ -51,6 +51,7 @@
 
   let state = "ready";
   let charge = 0;
+  let chargeDir = 1;
   const AIM_LO = 0.10;
   const AIM_HI = 0.48;
   const AIM_DEFAULT = 0.22;
@@ -144,7 +145,7 @@
   }
   function refreshHint() {
     if (!elHint || cleared || thrownOnce) return;
-    elHint.textContent = allMaxed() ? "The far shore is out there" : "Hold to charge · drag up or down to aim";
+    elHint.textContent = allMaxed() ? "The far shore is out there" : "Hold — the bar swings. Release on gold.";
     elHint.classList.remove("gone");
     elHint.classList.add("show");
   }
@@ -449,6 +450,7 @@
       resetStone();
       rollWind();
       charge = 0;
+      chargeDir = 1;
       if (elFill) {
         elFill.style.left = "0%";
         elFill.classList.remove("in-sweet");
@@ -639,7 +641,7 @@
     if (justCleared) {
       elResult.classList.add("far-shore");
       elResult.innerHTML = "Far shore<span class=\"sub\">Level complete</span>";
-    } else {
+      } else {
       elResult.classList.remove("far-shore");
       const label = skips === 1 ? "1 skip" : skips + " skips";
       elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
@@ -667,7 +669,11 @@
     }
 
     if (state === "charging") {
-      if (holding) charge = Math.min(1, charge + dt / chargeTime());
+      if (holding) {
+        charge += chargeDir * dt / chargeTime();
+        if (charge >= 1) { charge = 1; chargeDir = -1; }
+        if (charge <= 0) { charge = 0; chargeDir = 1; }
+      }
       Sfx.setCharge(charge);
       elFill.style.left = (charge * 100).toFixed(1) + "%";
       const inSweet = charge >= sweetLo() && charge <= sweetHi();
