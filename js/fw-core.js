@@ -88,3 +88,19 @@
     mid: makeRidge(0.34, 0.92, 0.48),
     near: makeRidge(0.18, 0.7, 0.38)
   };
+
+  function persist() {
+    try {
+      localStorage.setItem(BEST_KEY, String(best));
+      localStorage.setItem(PEBBLES_KEY, String(pebbles));
+      localStorage.setItem(UPGRADES_KEY, JSON.stringify({
+        v: 2,
+        face: upgrades.face,
+        spin: upgrades.spin,
+        arm: upgrades.arm,
+        eye: upgrades.eye,
+        hold: upgrades.hold
+      }));
+      if (cleared) localStorage.setItem(CLEARED_KEY, "1");
+    } catch (e) {}
+  }
