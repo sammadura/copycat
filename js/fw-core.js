@@ -304,8 +304,8 @@
     wind = (Math.random() * 2 - 1) * 22;
     if (Math.abs(wind) < 4) wind = 0;
     if (!wind) elWind.textContent = "still air";
-    else if (wind > 0) elWind.textContent = "tailwind  \u203a\u203a";
-    else elWind.textContent = "\u2039\u2039  headwind";
+    else if (wind > 0) elWind.textContent = "tailwind  ››";
+    else elWind.textContent = "‹‹  headwind";
   }
 
   const Sfx = {
@@ -643,7 +643,7 @@
     } else {
       elResult.classList.remove("far-shore");
       const label = skips === 1 ? "1 skip" : skips + " skips";
-      elResult.textContent = label + (isNewBest ? " \u00b7 new best" : "") + " \u00b7 +" + gained + " pebbles";
+      elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
     }
     requestAnimationFrame(function () { elResult.classList.add("show"); });
   }
