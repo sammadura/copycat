@@ -317,21 +317,33 @@
     const off = chargeDrawOffset();
     const x0 = wx(stone.x + off.x);
     const y0 = wy(stone.y + off.y);
-    const len = 56;
+    const len = 124;
     const x1 = x0 + Math.cos(aimAngle) * len;
     const y1 = y0 - Math.sin(aimAngle) * len;
     ctx.save();
-    ctx.strokeStyle = "rgba(243, 224, 194, 0.32)";
-    ctx.lineWidth = 1.15;
-    ctx.setLineDash([4, 5]);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(8, 10, 16, 0.5)";
+    ctx.lineWidth = 5.2;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255, 232, 176, 0.95)";
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([8, 6]);
     ctx.beginPath();
     ctx.moveTo(x0, y0);
     ctx.lineTo(x1, y1);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = "rgba(255, 236, 186, 0.98)";
     ctx.beginPath();
-    ctx.arc(x0, y0, 12, -aimAngle - 0.22, -aimAngle + 0.08);
+    ctx.arc(x1, y1, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255, 232, 176, 0.62)";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(x0, y0, 17, -aimAngle - 0.3, -aimAngle + 0.14);
     ctx.stroke();
     ctx.restore();
   }
@@ -666,3 +678,4 @@
     ctx.fillStyle = v;
     ctx.fillRect(0, 0, W, H);
   }
+
