@@ -1,4 +1,4 @@
-/* Flatwater */
+/* Flatwater — stone skipping on a dusk lake. Vanilla, one screen. */
   "use strict";
 
   const canvas = document.getElementById("game");
@@ -26,9 +26,9 @@
   const BASE_SWEET_LO = 0.72;
   const BASE_SWEET_HI = 0.88;
   const BASE_CHARGE = 0.92;
-  const ALPHA_STAR = 0.349;
-  const BETA_MAX = Math.PI * 0.25;
-  const ALPHA_MAX = 0.70;
+  const SKIP_THETA_CRIT = 0.38;
+  const SKIP_V_MIN = 74;
+  const SKIP_VX_MIN = 28;
   const MAX_LV = 5;
   const COSTS = [20, 48, 110, 240, 520];
   const FAR_SHORE = 2200;
