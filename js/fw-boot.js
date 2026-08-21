@@ -36,7 +36,7 @@
     if (isUi(e.target) || shopOpen) return;
     if (e.cancelable) e.preventDefault();
     holdPointer = true;
-    beginAim(e.clientY);
+    setAimFromPointer(e.clientX, e.clientY);
     beginCharge();
   }
   function up(e) {
@@ -51,9 +51,9 @@
   window.addEventListener("pointerdown", down, { passive: false });
   window.addEventListener("pointermove", function (e) {
     if (shopOpen || isUi(e.target)) return;
-    if (state !== "charging" && !holdPointer) return;
-    if (e.cancelable) e.preventDefault();
-    setAimFromPointer(e.clientY);
+    if (state !== "ready" && state !== "charging") return;
+    if (holdPointer && e.cancelable) e.preventDefault();
+    setAimFromPointer(e.clientX, e.clientY);
   }, { passive: false });
   window.addEventListener("pointerup", up, { passive: false });
   window.addEventListener("pointercancel", up, { passive: false });
