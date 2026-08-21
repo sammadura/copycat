@@ -29,6 +29,10 @@
         <span class="lbl">Score</span>
         <b id="score">0</b>
       </div>
+      <div class="stat stat-pebbles" id="stat-pebbles" data-ui role="button" title="Open upgrades">
+        <span class="lbl">Pebbles</span>
+        <b id="pebbles">0</b>
+      </div>
       <div class="stat">
         <span class="lbl">Best</span>
         <b id="best">0</b>
@@ -47,9 +51,70 @@
     <div class="meter-label">charge</div>
   </div>
 
-  <footer id="credit">
-    The move is Tony Dinh's (<a href="https://x.com/tdinh_me/status/2090635025272479854" target="_blank" rel="noopener noreferrer">@tdinh_me</a>): open a URL and play. Original game. Not affiliated.
-  </footer>
+  <button type="button" id="shop-btn" data-ui>Upgrades</button>
+
+  <div id="shop-root" data-ui aria-hidden="true">
+    <div id="shop-backdrop"></div>
+    <div id="shop-panel" role="dialog" aria-labelledby="shop-title">
+      <header class="shop-head">
+        <h2 id="shop-title">Upgrades</h2>
+        <button type="button" id="shop-close" aria-label="Close">×</button>
+      </header>
+      <p class="shop-stash">You have <b id="shop-pebbles">0</b> pebbles</p>
+      <div id="shop-list">
+        <div class="shop-row" data-upgrade="face">
+          <div class="shop-info">
+            <div class="shop-name">Flat face</div>
+            <div class="shop-effect">Wider skip angle — more chances to bounce</div>
+          </div>
+          <div class="shop-meta">
+            <div class="shop-level">0 / 5</div>
+            <button type="button" class="shop-buy">8</button>
+          </div>
+        </div>
+        <div class="shop-row" data-upgrade="spin">
+          <div class="shop-info">
+            <div class="shop-name">Spin</div>
+            <div class="shop-effect">Keeps more speed on each skip</div>
+          </div>
+          <div class="shop-meta">
+            <div class="shop-level">0 / 5</div>
+            <button type="button" class="shop-buy">8</button>
+          </div>
+        </div>
+        <div class="shop-row" data-upgrade="arm">
+          <div class="shop-info">
+            <div class="shop-name">Arm</div>
+            <div class="shop-effect">Throws harder and farther</div>
+          </div>
+          <div class="shop-meta">
+            <div class="shop-level">0 / 5</div>
+            <button type="button" class="shop-buy">8</button>
+          </div>
+        </div>
+        <div class="shop-row" data-upgrade="eye">
+          <div class="shop-info">
+            <div class="shop-name">Sweet eye</div>
+            <div class="shop-effect">Wider sweet band on the charge meter</div>
+          </div>
+          <div class="shop-meta">
+            <div class="shop-level">0 / 5</div>
+            <button type="button" class="shop-buy">8</button>
+          </div>
+        </div>
+        <div class="shop-row" data-upgrade="hold">
+          <div class="shop-info">
+            <div class="shop-name">Hold</div>
+            <div class="shop-effect">Slower charge — easier to hit the sweet spot</div>
+          </div>
+          <div class="shop-meta">
+            <div class="shop-level">0 / 5</div>
+            <button type="button" class="shop-buy">8</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="js/game.js"></script>
 </body>
