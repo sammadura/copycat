@@ -38,7 +38,7 @@
         <b id="best">0</b>
       </div>
     </div>
-    <p id="hint">Hold to charge · release to skip</p>
+    <p id="hint">Hold further for a longer skip</p>
     <p id="result" hidden></p>
   </div>
 
@@ -48,7 +48,13 @@
       <div class="sweet"></div>
       <div class="fill" id="fill"></div>
     </div>
-    <div class="meter-label">charge</div>
+    <div class="meter-bands" aria-hidden="true">
+      <span>dink</span>
+      <span>ride</span>
+      <span>long</span>
+      <span class="sweet-lbl">sweet</span>
+      <span>slam</span>
+    </div>
   </div>
 
   <button type="button" id="shop-btn" data-ui>Upgrades</button>
@@ -95,7 +101,7 @@
         <div class="shop-row" data-upgrade="eye">
           <div class="shop-info">
             <div class="shop-name">Sweet eye</div>
-            <div class="shop-effect">Warmer horizon, gold water path. Wider sweet band.</div>
+            <div class="shop-effect">Warmer horizon, gold water path. Wider gold band on the meter.</div>
           </div>
           <div class="shop-meta">
             <div class="shop-level">0 / 5</div>
