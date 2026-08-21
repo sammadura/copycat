@@ -1,36 +1,12 @@
-/* Flatwater — stone skipping on a dusk lake. Vanilla, one screen. */
+/* Flatwater — script loader (keeps game.js small so GitHub can host it). */
 (function () {
-  "use strict";
-
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d", { alpha: false });
-  const elScore = document.getElementById("score");
-  const elBest = document.getElementById("best");
-  const elHint = document.getElementById("hint");
-  const elResult = document.getElementById("result");
-  const elMeter = document.getElementById("meter");
-  const elFill = document.getElementById("fill");
-  const elWind = document.getElementById("wind");
-  const elPebbles = document.getElementById("pebbles");
-  const elShopPebbles = document.getElementById("shop-pebbles");
-  const elShopRoot = document.getElementById("shop-root");
-  const elShopBtn = document.getElementById("shop-btn");
-  const elShopClose = document.getElementById("shop-close");
-  const elShopBackdrop = document.getElementById("shop-backdrop");
-  const elStatPebbles = document.getElementById("stat-pebbles");
-  const elSweet = document.querySelector(".sweet");
-
-  const BEST_KEY = "flatwater.best";
-  const PEBBLES_KEY = "flatwater.pebbles";
-  const UPGRADES_KEY = "flatwater.upgrades";
-  const BASE_SWEET_LO = 0.72;
-  const BASE_SWEET_HI = 0.88;
-  const BASE_CHARGE = 0.92;
-  const SKIP_THETA_CRIT = 0.38;
-  const SKIP_V_MIN = 74;
-  const SKIP_VX_MIN = 28;
-  const MAX_LV = 5;
-  const COSTS = [8, 16, 28, 48, 80];
-  const UPGRADE_IDS = ["face", "spin", "arm", "eye", "hold"];
-  const GRAVITY = 380;
-  const WATER_Y = 0;
+  var files = ["js/fw-core.js?v=3", "js/fw-draw.js?v=3", "js/fw-boot.js?v=3"];
+  function next(i) {
+    if (i >= files.length) return;
+    var s = document.createElement("script");
+    s.src = files[i];
+    s.onload = function () { next(i + 1); };
+    document.head.appendChild(s);
+  }
+  next(0);
+})();
