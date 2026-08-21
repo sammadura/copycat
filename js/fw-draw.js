@@ -312,6 +312,30 @@
     }
   }
 
+  function drawAimLine() {
+    if (state !== "ready" && state !== "charging") return;
+    const off = chargeDrawOffset();
+    const x0 = wx(stone.x + off.x);
+    const y0 = wy(stone.y + off.y);
+    const len = 56;
+    const x1 = x0 + Math.cos(aimAngle) * len;
+    const y1 = y0 - Math.sin(aimAngle) * len;
+    ctx.save();
+    ctx.strokeStyle = "rgba(243, 224, 194, 0.32)";
+    ctx.lineWidth = 1.15;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.2;
+    ctx.beginPath();
+    ctx.arc(x0, y0, 12, -aimAngle - 0.22, -aimAngle + 0.08);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawRipples() {
     function ring(x, r, a, w) {
       const sx = wx(x);
@@ -642,4 +666,3 @@
     ctx.fillStyle = v;
     ctx.fillRect(0, 0, W, H);
   }
-
