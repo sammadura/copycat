@@ -192,3 +192,10 @@ function rollWind() {
   if (Math.abs(wind) < 4) wind = 0;
   elWind.textContent = !wind ? "still air" : (wind > 0 ? "tailwind  ››" : "‹‹  headwind");
 }
+function mix(a, b, u) { return a + (b - a) * u; }
+function rgb3(r, g, b) { return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")"; }
+function sunPos() {
+  const eye = upgrades.eye;
+  const lifts = [0.11, 0.16, 0.21, 0.28, 0.34, 0.42];
+  return { x: W * 0.71, y: waterScreen - H * lifts[Math.max(0, Math.min(5, eye | 0))] };
+}
