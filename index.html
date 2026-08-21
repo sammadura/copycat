@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Flatwater</title>
+  <meta name="description" content="Skip a stone across a dusk lake. Open the URL and play — no signup, no download.">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Flatwater">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Flatwater">
+  <meta property="og:description" content="A one-screen stone-skipping game on a dusk lake. Open the URL and play.">
+  <meta property="og:image" content="favicon.svg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Flatwater">
+  <meta name="twitter:description" content="Skip a stone across a dusk lake. Open the URL and play.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game" aria-label="Flatwater stone-skipping lake"></canvas>
+
+  <div id="hud">
+    <div id="wordmark">Flatwater</div>
+    <div id="stats">
+      <div class="stat">
+        <span class="lbl">Score</span>
+        <b id="score">0</b>
+      </div>
+      <div class="stat">
+        <span class="lbl">Best</span>
+        <b id="best">0</b>
+      </div>
+    </div>
+    <p id="hint">Hold to charge · release to skip</p>
+    <p id="result" hidden></p>
+  </div>
+
+  <div id="meter" hidden>
+    <div id="wind"></div>
+    <div class="track">
+      <div class="sweet"></div>
+      <div class="fill" id="fill"></div>
+    </div>
+    <div class="meter-label">charge</div>
+  </div>
+
+  <footer id="credit">
+    The move is Tony Dinh's (<a href="https://x.com/tdinh_me/status/2090635025272479854" target="_blank" rel="noopener noreferrer">@tdinh_me</a>): open a URL and play. Original game. Not affiliated.
+  </footer>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
