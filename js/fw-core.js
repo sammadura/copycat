@@ -51,6 +51,12 @@
 
   let state = "ready";
   let charge = 0;
+  const AIM_LO = 0.10;
+  const AIM_HI = 0.48;
+  const AIM_DEFAULT = 0.22;
+  let aimAngle = AIM_DEFAULT;
+  let aimStartY = 0;
+  let aimStartA = AIM_DEFAULT;
   let wind = 0;
   let skips = 0;
   let maxX = 0;
@@ -138,11 +144,9 @@
   }
   function refreshHint() {
     if (!elHint || cleared || thrownOnce) return;
-    if (allMaxed()) {
-      elHint.textContent = "The far shore is out there";
-      elHint.classList.remove("gone");
-      elHint.classList.add("show");
-    }
+    elHint.textContent = allMaxed() ? "The far shore is out there" : "Hold to charge · drag up or down to aim";
+    elHint.classList.remove("gone");
+    elHint.classList.add("show");
   }
 
   function refreshPebbles() {
@@ -420,7 +424,7 @@
     stone.y = -16;
     stone.vx = 0;
     stone.vy = 0;
-    stone.rot = -0.22;
+    stone.rot = -aimAngle;
     stone.spin = 0;
     stone.sx = 1;
     stone.sy = 1;
@@ -475,16 +479,19 @@
     return Math.max(0.20, 0.35 - over * 0.15);
   }
 
-  function throwAngle(p) {
-    const lo = sweetLo();
-    const hi = sweetHi();
-    if (p >= lo && p <= hi) {
-      const t = (p - lo) / Math.max(0.001, hi - lo);
-      return 0.26 - t * 0.08;
-    }
-    if (p < lo) return 0.52 - (p / lo) * 0.26;
-    const over = (p - hi) / Math.max(0.001, 1 - hi);
-    return 0.16 - over * 0.28;
+  function clampAim(a) {
+    return Math.max(AIM_LO, Math.min(AIM_HI, a));
+  }
+  function beginAim(clientY) {
+    aimStartY = clientY;
+    aimStartA = aimAngle;
+  }
+  function setAimFromPointer(clientY) {
+    const h = 0.42 * window.innerHeight;
+    aimAngle = clampAim(aimStartA + (aimStartY - clientY) / h * (AIM_HI - AIM_LO));
+  }
+  function nudgeAim(dir) {
+    aimAngle = clampAim(aimAngle + dir * 0.012);
   }
 
   function releaseThrow() {
@@ -496,7 +503,7 @@
     const p = Math.max(0.06, charge);
     const q = qualityOf(p);
     const speed = 130 + p * 440 + q * 30 + 55 * upgrades.arm;
-    const angle = throwAngle(p);
+    const angle = aimAngle;
     const hi = sweetHi();
     let omega0 = 8 + p * 8 + q * 5 + upgrades.spin * 5.5;
     if (p > hi) {
@@ -632,7 +639,7 @@
     if (justCleared) {
       elResult.classList.add("far-shore");
       elResult.innerHTML = "Far shore<span class=\"sub\">Level complete</span>";
-      } else {
+    } else {
       elResult.classList.remove("far-shore");
       const label = skips === 1 ? "1 skip" : skips + " skips";
       elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
@@ -654,7 +661,7 @@
 
     if (state === "ready") {
       stone.y = -16 + Math.sin(performance.now() * 0.0018) * 0.6;
-      stone.rot = -0.22;
+      stone.rot = -aimAngle;
       cam.tx = -20;
       cam.ty = 0;
     }
@@ -669,7 +676,7 @@
       const pull = charge * 18;
       stone.x = -pull;
       stone.y = -16 - charge * 3;
-      stone.rot = -0.22 - charge * (0.35 + 0.055 * upgrades.hold);
+      stone.rot = -aimAngle - charge * 0.04;
       stone.tsx = 1 + charge * 0.08;
       stone.tsy = 1 - charge * 0.1;
       cam.tx = -20 - charge * (12 + upgrades.hold * 2.2);
@@ -779,4 +786,3 @@
       y: waterScreen - H * lifts[Math.max(0, Math.min(5, eye | 0))]
     };
   }
-
