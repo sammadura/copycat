@@ -1,6 +1,6 @@
 /* Flatwater — script loader (keeps game.js small so GitHub can host it). */
 (function () {
-  var files = ["js/fw-core.js?v=5", "js/fw-draw.js?v=5", "js/fw-boot.js?v=5"];
+  var files = ["js/fw-core.js?v=6", "js/fw-draw.js?v=6", "js/fw-boot.js?v=6"];
   function next(i) {
     if (i >= files.length) return;
     var s = document.createElement("script");
