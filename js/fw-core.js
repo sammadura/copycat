@@ -52,7 +52,7 @@
   let state = "ready";
   let charge = 0;
   let chargeDir = 1;
-  const AIM_LO = -0.52;
+  const AIM_LO = -0.90;
   const AIM_HI = 0.48;
   const AIM_DEFAULT = 0.22;
   let aimAngle = AIM_DEFAULT;
@@ -625,7 +625,7 @@
       best = score;
       elBest.textContent = String(best);
     }
-    const gained = Math.max(1, skips * 2 + Math.floor(score / 40)) + (isNewBest ? 5 : 0);
+    const gained = (skips < 1 ? 0 : Math.max(1, skips + Math.floor(score / 100))) + (isNewBest ? 2 : 0);
     pebbles += gained;
     persist();
     refreshPebbles();
@@ -639,11 +639,11 @@
     elResult.hidden = false;
     if (justCleared) {
       elResult.classList.add("far-shore");
-      elResult.innerHTML = "Far shore<span class=\"sub\">Level complete</span>";
+      elResult.innerHTML = "Far shore\u003cspan class=\"sub\"\u003eLevel complete\u003c/span\u003e";
     } else {
       elResult.classList.remove("far-shore");
       const label = skips === 1 ? "1 skip" : skips + " skips";
-      elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
+      elResult.textContent = label + (isNewBest ? " \u00b7 new best" : "") + " \u00b7 +" + gained + " pebbles";
     }
     requestAnimationFrame(function () { elResult.classList.add("show"); });
   }
