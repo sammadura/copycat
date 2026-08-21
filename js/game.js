@@ -11,11 +11,24 @@
   const elMeter = document.getElementById("meter");
   const elFill = document.getElementById("fill");
   const elWind = document.getElementById("wind");
+  const elPebbles = document.getElementById("pebbles");
+  const elShopPebbles = document.getElementById("shop-pebbles");
+  const elShopRoot = document.getElementById("shop-root");
+  const elShopBtn = document.getElementById("shop-btn");
+  const elShopClose = document.getElementById("shop-close");
+  const elShopBackdrop = document.getElementById("shop-backdrop");
+  const elStatPebbles = document.getElementById("stat-pebbles");
+  const elSweet = document.querySelector(".sweet");
 
   const BEST_KEY = "flatwater.best";
-  const SWEET_LO = 0.58;
-  const SWEET_HI = 0.78;
-  const CHARGE_TIME = 0.92;
+  const PEBBLES_KEY = "flatwater.pebbles";
+  const UPGRADES_KEY = "flatwater.upgrades";
+  const BASE_SWEET_LO = 0.68;
+  const BASE_SWEET_HI = 0.76;
+  const BASE_CHARGE = 0.92;
+  const MAX_LV = 5;
+  const COSTS = [8, 16, 28, 48, 80];
+  const UPGRADE_IDS = ["face", "spin", "arm", "eye", "hold"];
   const GRAVITY = 380;
   const WATER_Y = 0;
 
@@ -46,6 +59,9 @@
   let holdPointer = false;
   let holdSpace = false;
   let throwQ = 0.6;
+  let pebbles = 0;
+  let upgrades = { face: 0, spin: 0, arm: 0, eye: 0, hold: 0 };
+  let shopOpen = false;
 
   const ripples = [];
   const spray = [];
@@ -60,7 +76,92 @@
   };
 
   try { best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0; } catch (e) { best = 0; }
+  try { pebbles = parseInt(localStorage.getItem(PEBBLES_KEY) || "0", 10) || 0; } catch (e) { pebbles = 0; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(UPGRADES_KEY) || "{}");
+    UPGRADE_IDS.forEach(function (id) {
+      const n = parseInt(raw && raw[id], 10);
+      upgrades[id] = isFinite(n) ? Math.max(0, Math.min(MAX_LV, n)) : 0;
+    });
+  } catch (e) {}
   elBest.textContent = String(best);
+  if (elPebbles) elPebbles.textContent = String(pebbles);
+
+  function sweetLo() { return BASE_SWEET_LO - 0.015 * upgrades.eye; }
+  function sweetHi() { return BASE_SWEET_HI + 0.015 * upgrades.eye; }
+  function chargeTime() { return BASE_CHARGE + 0.18 * upgrades.hold; }
+
+  function persist() {
+    try {
+      localStorage.setItem(BEST_KEY, String(best));
+      localStorage.setItem(PEBBLES_KEY, String(pebbles));
+      localStorage.setItem(UPGRADES_KEY, JSON.stringify(upgrades));
+    } catch (e) {}
+  }
+
+  function refreshPebbles() {
+    if (elPebbles) elPebbles.textContent = String(pebbles);
+    if (elShopPebbles) elShopPebbles.textContent = String(pebbles);
+  }
+
+  function applySweetBand() {
+    if (!elSweet) return;
+    const lo = sweetLo();
+    const hi = sweetHi();
+    elSweet.style.left = (lo * 100).toFixed(2) + "%";
+    elSweet.style.width = ((hi - lo) * 100).toFixed(2) + "%";
+  }
+
+  function nextCost(lv) {
+    if (lv >= MAX_LV) return null;
+    return COSTS[lv];
+  }
+
+  function renderShop() {
+    refreshPebbles();
+    const rows = document.querySelectorAll(".shop-row");
+    for (let i = 0; i < rows.length; i++) {
+      const id = rows[i].getAttribute("data-upgrade");
+      const lv = upgrades[id] || 0;
+      const cost = nextCost(lv);
+      const levelEl = rows[i].querySelector(".shop-level");
+      const buyEl = rows[i].querySelector(".shop-buy");
+      if (levelEl) levelEl.textContent = lv + " / " + MAX_LV;
+      if (!buyEl) continue;
+      if (cost == null) {
+        buyEl.textContent = "MAX";
+        buyEl.disabled = true;
+      } else {
+        buyEl.textContent = String(cost);
+        buyEl.disabled = pebbles < cost;
+      }
+    }
+  }
+
+  function openShop() {
+    shopOpen = true;
+    renderShop();
+    elShopRoot.classList.add("open");
+    elShopRoot.setAttribute("aria-hidden", "false");
+  }
+
+  function closeShop() {
+    shopOpen = false;
+    elShopRoot.classList.remove("open");
+    elShopRoot.setAttribute("aria-hidden", "true");
+  }
+
+  function buyUpgrade(id) {
+    if (UPGRADE_IDS.indexOf(id) < 0) return;
+    const lv = upgrades[id] || 0;
+    const cost = nextCost(lv);
+    if (cost == null || pebbles < cost) return;
+    pebbles -= cost;
+    upgrades[id] = lv + 1;
+    persist();
+    applySweetBand();
+    renderShop();
+  }
 
   function makeRidge(amp, freq, seed) {
     const pts = [];
@@ -232,6 +333,7 @@
   }
 
   function beginCharge() {
+    if (shopOpen) return;
     if (state === "flight") return;
     if (state === "sunk" && resultTimer < 0.28) return;
     Sfx.ensure();
@@ -249,20 +351,24 @@
   }
 
   function qualityOf(p) {
-    if (p >= SWEET_LO && p <= SWEET_HI) {
-      const mid = (SWEET_LO + SWEET_HI) / 2;
-      const half = (SWEET_HI - SWEET_LO) / 2;
+    const lo = sweetLo();
+    const hi = sweetHi();
+    if (p >= lo && p <= hi) {
+      const mid = (lo + hi) / 2;
+      const half = (hi - lo) / 2;
       return 0.9 + 0.1 * (1 - Math.abs(p - mid) / half);
     }
-    if (p < SWEET_LO) return Math.max(0.06, Math.pow(p / SWEET_LO, 1.6) * 0.62);
-    const over = (p - SWEET_HI) / (1 - SWEET_HI);
+    if (p < lo) return Math.max(0.06, Math.pow(p / lo, 1.6) * 0.62);
+    const over = (p - hi) / (1 - hi);
     return Math.max(0.18, 0.7 - over * 0.52);
   }
 
   function throwAngle(p) {
-    if (p >= SWEET_LO && p <= SWEET_HI) return 0.232 - (p - SWEET_LO) * 0.12;
-    if (p < SWEET_LO) return 0.52 - p * 0.48;
-    return 0.155 - (p - SWEET_HI) * 0.36;
+    const lo = sweetLo();
+    const hi = sweetHi();
+    if (p >= lo && p <= hi) return 0.232 - (p - lo) * 0.12;
+    if (p < lo) return 0.52 - p * 0.48;
+    return 0.155 - (p - hi) * 0.36;
   }
 
   function releaseThrow() {
@@ -273,7 +379,7 @@
 
     const p = Math.max(0.06, charge);
     const q = qualityOf(p);
-    const speed = 170 + p * 360 + q * 80;
+    const speed = 170 + p * 360 + q * 80 + 18 * upgrades.arm;
     const angle = throwAngle(p);
 
     throwQ = q;
@@ -314,11 +420,11 @@
   function trySkip() {
     const spd = Math.hypot(stone.vx, stone.vy);
     const inc = Math.atan2(stone.vy, Math.max(40, stone.vx));
-    const maxAng = 0.48;
+    const maxAng = 0.48 + 0.035 * upgrades.face;
     let canSkip = inc < maxAng && spd > 72 && stone.vx > 32;
     if (canSkip && throwQ < 0.55 && inc > 0.30 && skips === 0) canSkip = false;
     if (canSkip) {
-      const keep = (0.80 - skips * 0.046) * (0.56 + 0.44 * (1 - inc / maxAng)) * (0.34 + 0.72 * throwQ);
+      const keep = (0.80 - skips * 0.046 + 0.035 * upgrades.spin) * (0.56 + 0.44 * (1 - inc / maxAng)) * (0.34 + 0.72 * throwQ);
       stone.vy = -Math.abs(stone.vy) * keep;
       if (throwQ > 0.88) stone.vy -= 14;
       stone.vx *= (0.92 - skips * 0.012) * (0.88 + 0.12 * throwQ);
@@ -356,14 +462,19 @@
     maxX = Math.max(maxX, stone.x);
     score = skips * 10 + Math.round(maxX * 0.12);
     elScore.textContent = String(score);
-    if (score > best) {
+    const isNewBest = score > best;
+    if (isNewBest) {
       best = score;
       elBest.textContent = String(best);
-      try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
     }
+    const gained = Math.max(1, skips * 2 + Math.floor(score / 40)) + (isNewBest ? 5 : 0);
+    pebbles += gained;
+    persist();
+    refreshPebbles();
+    if (shopOpen) renderShop();
     const label = skips === 1 ? "1 skip" : skips + " skips";
     elResult.hidden = false;
-    elResult.textContent = label;
+    elResult.textContent = label + (isNewBest ? " · new best" : "") + " · +" + gained + " pebbles";
     requestAnimationFrame(function () { elResult.classList.add("show"); });
   }
 
@@ -387,10 +498,10 @@
     }
 
     if (state === "charging") {
-      if (holding) charge = Math.min(1, charge + dt / CHARGE_TIME);
+      if (holding) charge = Math.min(1, charge + dt / chargeTime());
       Sfx.setCharge(charge);
       elFill.style.width = (charge * 100).toFixed(1) + "%";
-      const inSweet = charge >= SWEET_LO && charge <= SWEET_HI;
+      const inSweet = charge >= sweetLo() && charge <= sweetHi();
       elFill.style.background = inSweet
         ? "linear-gradient(90deg, #e8954a, #f3e0c2)"
         : "linear-gradient(90deg, #c9a27a, #f3e0c2)";
@@ -743,19 +854,19 @@
     requestAnimationFrame(frame);
   }
 
-  function isCreditLink(t) {
-    return t && t.closest && t.closest("#credit a");
+  function isUi(t) {
+    return !!(t && t.closest && t.closest("[data-ui]"));
   }
 
   function down(e) {
-    if (isCreditLink(e.target)) return;
+    if (isUi(e.target) || shopOpen) return;
     if (e.cancelable) e.preventDefault();
     holdPointer = true;
     beginCharge();
   }
   function up(e) {
-    if (isCreditLink(e.target)) return;
-    if (e && e.cancelable) e.preventDefault();
+    if (isUi(e.target) && state !== "charging") return;
+    if (e && e.cancelable && !isUi(e.target)) e.preventDefault();
     holdPointer = false;
     holding = holdSpace;
     if (state === "charging" && !holding) releaseThrow();
@@ -769,6 +880,7 @@
 
   window.addEventListener("keydown", function (e) {
     if (e.code !== "Space" && e.key !== " ") return;
+    if (shopOpen) return;
     e.preventDefault();
     if (e.repeat) return;
     holdSpace = true;
@@ -791,6 +903,37 @@
     }
   });
 
+  if (elShopBtn) elShopBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (shopOpen) closeShop();
+    else openShop();
+  });
+  if (elStatPebbles) elStatPebbles.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (shopOpen) closeShop();
+    else openShop();
+  });
+  if (elShopClose) elShopClose.addEventListener("click", function (e) {
+    e.preventDefault();
+    closeShop();
+  });
+  if (elShopBackdrop) elShopBackdrop.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    closeShop();
+  });
+  document.querySelectorAll(".shop-buy").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      const row = btn.closest(".shop-row");
+      if (row) buyUpgrade(row.getAttribute("data-upgrade"));
+    });
+  });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && shopOpen) closeShop();
+  });
+
+  applySweetBand();
+  renderShop();
   resize();
   resetStone();
   rollWind();
