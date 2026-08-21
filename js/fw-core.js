@@ -52,7 +52,7 @@
   let state = "ready";
   let charge = 0;
   let chargeDir = 1;
-  const AIM_LO = 0.10;
+  const AIM_LO = -0.52;
   const AIM_HI = 0.48;
   const AIM_DEFAULT = 0.22;
   let aimAngle = AIM_DEFAULT;
@@ -791,4 +791,3 @@
       y: waterScreen - H * lifts[Math.max(0, Math.min(5, eye | 0))]
     };
   }
-
